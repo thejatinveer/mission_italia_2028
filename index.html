@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Mission: Italia 2028</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{background:#0a0a0a;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:16px;color:#fff}
+    .container{width:100%;max-width:440px;display:flex;flex-direction:column;gap:16px}
+    .card,.add-card,.forex-card,.history-card,.settings-card{background:#1c1c1e;border-radius:24px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.45)}
+    .header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px}
+    .header-left{display:flex;align-items:flex-start;gap:12px;flex:1;min-width:0}
+    .icon-circle{width:42px;height:42px;background:#2c2c2e;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .icon-circle svg{width:22px;height:22px}
+    .title-block{padding-top:2px;min-width:0}
+    .title{font-size:19px;font-weight:600;letter-spacing:-.3px;line-height:1.25;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+    .title .emoji{font-size:17px}
+    .deadline{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:13.5px;color:#8e8e93}
+    .deadline svg{width:14px;height:14px;flex-shrink:0}
+    .thumbnail{width:62px;height:62px;border-radius:14px;object-fit:cover;flex-shrink:0;cursor:pointer;transition:opacity .2s}
+    .thumbnail:hover{opacity:.85}
+    .divider{height:1px;background:#2c2c2e;margin:0 0 16px}
+    .stats{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:8px}
+    .stat-label{font-size:13px;color:#8e8e93;margin-bottom:4px}
+    .stat-value{font-size:21px;font-weight:600;letter-spacing:-.4px;white-space:nowrap}
+    .stat-center{text-align:center;flex:1}
+    .percent{font-size:26px;font-weight:700;color:#30d158;letter-spacing:-.5px;line-height:1.1}
+    .complete-label{font-size:13px;color:#8e8e93;margin-top:2px}
+    .stat-right{text-align:right}
+    .progress-section{margin-bottom:16px}
+    .progress-pill{display:inline-block;background:#2c2c2e;color:#30d158;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;margin-bottom:8px;position:relative}
+    .progress-pill::after{content:"";position:absolute;bottom:-5px;left:12px;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #2c2c2e}
+    .progress-track{height:8px;background:#2c2c2e;border-radius:4px;position:relative}
+    .progress-fill{position:absolute;left:0;top:0;height:100%;width:0%;background:#30d158;border-radius:4px;transition:width .45s cubic-bezier(.22,1,.36,1)}
+    .progress-dot{position:absolute;left:0%;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;background:#30d158;border-radius:50%;box-shadow:0 0 0 3px rgba(48,209,88,.28);transition:left .45s cubic-bezier(.22,1,.36,1)}
+    .progress-amounts{text-align:center;margin-top:10px;font-size:14px;color:#8e8e93}
+    .remaining{display:flex;align-items:center;gap:12px}
+    .wallet-icon{width:42px;height:42px;background:#2c2c2e;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .wallet-icon svg{width:20px;height:20px}
+    .remaining-amount{font-size:21px;font-weight:600;letter-spacing:-.4px}
+    .add-title{font-size:20px;font-weight:600;margin-bottom:14px}
+    .add-row{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+    .amount-input{flex:1;min-width:120px;height:48px;background:#2c2c2e;border:none;border-radius:14px;padding:0 16px;font-size:16px;color:#fff;font-family:inherit;outline:none}
+    .amount-input::placeholder{color:#636366}
+    .amount-input:focus{background:#3a3a3c;box-shadow:0 0 0 2px rgba(48,209,88,.35)}
+    .amount-input::-webkit-outer-spin-button,.amount-input::-webkit-inner-spin-button{-webkit-appearance:none}
+    .add-btn,.action-btn{height:48px;padding:0 18px;border:none;border-radius:14px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;transition:all .2s}
+    .add-btn{background:#30d158;color:#000}
+    .add-btn:hover{background:#28c04c}
+    .add-btn:active{transform:scale(.97)}
+    .add-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+    .action-btn{background:#2c2c2e;color:#fff}
+    .action-btn:hover{background:#3a3a3c}
+    .action-btn:disabled{opacity:.4;cursor:not-allowed}
+    .status-text{font-size:13px;color:#8e8e93;min-height:18px;transition:color .3s}
+    .status-text.success{color:#30d158}
+    .forex-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .rate-box{background:#2c2c2e;border-radius:14px;padding:12px 16px;flex:1;min-width:140px;text-align:center}
+    .rate-label{font-size:12px;color:#8e8e93;margin-bottom:4px}
+    .rate-value{font-size:18px;font-weight:600;color:#30d158}
+    .currency-toggle{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    .toggle-btn{flex:1;min-width:100px;height:42px;border:none;border-radius:12px;background:#2c2c2e;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+    .toggle-btn.active{background:#30d158;color:#000}
+    .section-title{font-size:17px;font-weight:600;margin-bottom:12px}
+    .history-list{max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+    .history-item{background:#2c2c2e;border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;font-size:14px}
+    .history-amount{font-weight:600;color:#30d158}
+    .history-time{font-size:12px;color:#8e8e93}
+    .settings-row{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+    .settings-row label{font-size:13px;color:#8e8e93}
+    .settings-input{height:44px;background:#2c2c2e;border:none;border-radius:12px;padding:0 14px;font-size:15px;color:#fff;font-family:inherit;outline:none;width:100%}
+    .settings-input:focus{box-shadow:0 0 0 2px rgba(48,209,88,.35)}
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+    .small-btn{height:40px;padding:0 16px;border:none;border-radius:12px;background:#2c2c2e;color:#fff;font-size:14px;font-weight:600;cursor:pointer}
+    .small-btn:hover{background:#3a3a3c}
+    .small-btn.primary{background:#30d158;color:#000}
+    .undo-redo{display:flex;gap:8px;margin-bottom:12px}
+    @media(max-width:380px){.title{font-size:17px}.stat-value,.remaining-amount{font-size:18px}.percent{font-size:22px}.add-row{flex-direction:column;align-items:stretch}.add-btn,.action-btn{width:100%}.thumbnail{width:54px;height:54px}}
+    .utility-card{background:#1c1c1e;border-radius:24px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+    .utility-card .section-title{margin-bottom:14px}
+    .theme-btn{height:40px;padding:0 14px;border:0;border-radius:12px;background:#2c2c2e;color:#fff;font:600 14px inherit;cursor:pointer}
+    .utility-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .utility-actions button{flex:1}
+    .file-input{display:none}
+    body.light{background:#f2f2f7;color:#1c1c1e}
+    body.light .card,body.light .add-card,body.light .forex-card,body.light .history-card,body.light .settings-card,body.light .utility-card{background:#fff;box-shadow:0 8px 28px rgba(0,0,0,.08)}
+    body.light .divider{background:#e5e5ea}
+    body.light .icon-circle,body.light .wallet-icon,body.light .progress-pill,body.light .rate-box,body.light .history-item,body.light .amount-input,body.light .action-btn,body.light .toggle-btn:not(.active),body.light .settings-input,body.light .small-btn:not(.primary),body.light .theme-btn{background:#f2f2f7;color:#1c1c1e}
+    body.light .amount-input::placeholder{color:#8e8e93}
+    body.light .amount-input:focus,body.light .settings-input:focus{background:#fff}
+    body.light .progress-pill::after{border-top-color:#f2f2f7}
+    @media(min-width:800px){
+      body{padding:32px clamp(24px,4vw,72px);align-items:flex-start}
+      .container{max-width:1440px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(340px,.9fr);gap:24px;align-items:stretch}
+      .card,.add-card{min-width:0;padding:28px;border-radius:26px}
+      .add-card{display:flex;flex-direction:column;justify-content:center}
+      .forex-card,.history-card,.settings-card,.utility-card{grid-column:1 / -1;min-width:0}
+      .title{font-size:clamp(20px,1.6vw,26px)}
+      .thumbnail{width:88px;height:88px;border-radius:18px}
+      .stat-value,.remaining-amount{font-size:clamp(22px,1.8vw,30px)}
+      .percent{font-size:36px}
+      .icon-circle,.wallet-icon{width:48px;height:48px}
+      .amount-input,.add-btn,.action-btn{height:52px;font-size:16px}
+      .add-row{flex-wrap:nowrap}
+    }
+    @media(min-width:1200px){.container{grid-template-columns:minmax(0,1.4fr) minmax(400px,.85fr)}.forex-row{gap:16px}.settings-card{padding:28px 32px}}
+    @media(max-width:520px){body{padding:12px}.card,.add-card,.forex-card,.history-card,.settings-card,.utility-card{padding:16px;border-radius:20px}.container{max-width:100%}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- MAIN CARD -->
+    <div class="card">
+      <div class="header">
+        <div class="header-left">
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+          </div>
+          <div class="title-block">
+            <div class="title" id="goalNameDisplay">Mission: Italia 2028 <span class="emoji">👽</span><span class="emoji">❤️</span><span class="emoji">🇮🇹</span></div>
+            <div class="deadline">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Deadline: 28 April 2028
+            </div>
+          </div>
+        </div>
+        <img class="thumbnail" id="missionImage" src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=200&h=200&fit=crop" alt="Mission" title="Click to change image">
+      </div>
+      <div class="divider"></div>
+      <div class="stats">
+        <div>
+          <div class="stat-label">Goal</div>
+          <div class="stat-value" id="goalDisplay">₹9,00,000</div>
+        </div>
+        <div class="stat-center">
+          <div class="percent" id="percentDisplay">0%</div>
+          <div class="complete-label">complete</div>
+        </div>
+        <div class="stat-right">
+          <div class="stat-label">Added</div>
+          <div class="stat-value" id="addedDisplay">₹0</div>
+        </div>
+      </div>
+      <div class="progress-section">
+        <div class="progress-pill" id="progressPill">0%</div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+          <div class="progress-dot" id="progressDot"></div>
+        </div>
+        <div class="progress-amounts" id="progressAmounts">₹0 / ₹9,00,000</div>
+      </div>
+      <div class="divider"></div>
+      <div class="remaining">
+        <div class="wallet-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+        </div>
+        <div>
+          <div class="stat-label">Remaining</div>
+          <div class="remaining-amount" id="remainingDisplay">₹9,00,000</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD MONEY -->
+    <div class="add-card">
+      <div class="add-title">Add to your savings</div>
+      <div class="undo-redo">
+        <button class="action-btn" id="undoBtn" disabled>↶ Undo</button>
+        <button class="action-btn" id="redoBtn" disabled>↷ Redo</button>
+      </div>
+      <div class="add-row">
+        <input type="number" class="amount-input" id="amountInput" placeholder="Enter amount" min="0.01" step="any" inputmode="decimal">
+        <select id="inputCurrency" class="action-btn" style="padding:0 12px;min-width:80px">
+          <option value="INR">INR</option>
+          <option value="EUR">EUR</option>
+        </select>
+        <button class="add-btn" id="addBtn" disabled>+ Add</button>
+      </div>
+      <div class="status-text" id="statusText">Savings updated and saved on this device.</div>
+    </div>
+
+    <!-- FOREX -->
+    <div class="forex-card">
+      <div class="section-title">Live Forex (Frankfurter)</div>
+      <div class="forex-row">
+        <div class="rate-box">
+          <div class="rate-label">1 EUR =</div>
+          <div class="rate-value" id="eurInrRate">—</div>
+        </div>
+        <div class="rate-box">
+          <div class="rate-label">1 INR =</div>
+          <div class="rate-value" id="inrEurRate">—</div>
+        </div>
+      </div>
+      <div class="currency-toggle">
+        <button class="toggle-btn active" id="displayInr">Display in INR</button>
+        <button class="toggle-btn" id="displayEur">Display in EUR</button>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:#8e8e93" id="rateUpdated">Fetching live rate…</div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="history-card">
+      <div class="section-title">History</div>
+      <div class="history-list" id="historyList">
+        <div style="color:#8e8e93;font-size:14px;text-align:center;padding:12px">No additions yet</div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="settings-card">
+      <div class="section-title">Edit Goal</div>
+      <div class="settings-row">
+        <label>Goal Name</label>
+        <input type="text" class="settings-input" id="editName" placeholder="Mission name">
+      </div>
+      <div class="settings-row">
+        <label>Goal Amount (in INR)</label>
+        <input type="number" class="settings-input" id="editGoal" placeholder="900000" min="1">
+      </div>
+      <div class="settings-row">
+        <label>Image URL</label>
+        <input type="text" class="settings-input" id="editImage" placeholder="https://...">
+      </div>
+      <div class="btn-row">
+        <button class="small-btn primary" id="saveSettings">Save Changes</button>
+        <button class="small-btn" id="resetAll">Reset Everything</button>
+      </div>
+    </div>
+    <div class="utility-card">
+      <div class="section-title">Appearance &amp; Backups</div>
+      <div class="utility-actions">
+        <button class="theme-btn" id="themeToggle" type="button">☀️ Switch to light mode</button>
+        <button class="small-btn" id="exportBtn" type="button">Export backup</button>
+        <button class="small-btn" id="importBtn" type="button">Import backup</button>
+        <input class="file-input" id="importFile" type="file" accept="application/json,.json">
+      </div>
+      <div class="status-text" id="backupStatus" style="margin-top:10px">Back up your data regularly. Exported JSON files are not encrypted.</div>
+    </div>
+  </div>
+
+  <script>
+    // ========== STATE ==========
+    const DEFAULT_GOAL = 900000;
+    const DEFAULT_NAME = "Mission: Italia 2028 👽❤️🇮🇹";
+    const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=200&h=200&fit=crop";
+
+    let state = {
+      goalINR: DEFAULT_GOAL,
+      goalName: DEFAULT_NAME,
+      image: DEFAULT_IMAGE,
+      savedINR: 0,               // always stored in INR
+      displayCurrency: "INR",    // INR | EUR
+      inputCurrency: "INR",      // INR | EUR
+      history: [],               // {amountINR, amountDisplay, currency, timestamp}
+      undoStack: [],
+      redoStack: [],
+      eurInr: 106.5,             // fallback
+      theme: "dark"
+    };
+
+    // ========== DOM ==========
+    const $ = id => document.getElementById(id);
+    const amountInput = $("amountInput");
+    const addBtn = $("addBtn");
+    const undoBtn = $("undoBtn");
+    const redoBtn = $("redoBtn");
+    const inputCurrency = $("inputCurrency");
+    const statusText = $("statusText");
+    const historyList = $("historyList");
+
+    // ========== HELPERS ==========
+    function format(num, currency) {
+      if (currency === "EUR") {
+        return "€" + Number(num).toLocaleString("en-IN", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+      return "₹" + Math.round(num).toLocaleString("en-IN");
+    }
+
+    function toINR(amount, fromCurrency) {
+      if (fromCurrency === "EUR") return amount * state.eurInr;
+      return amount;
+    }
+
+    function fromINR(amountINR, toCurrency) {
+      if (toCurrency === "EUR") return amountINR / state.eurInr;
+      return amountINR;
+    }
+
+    function formatPercent(saved, goal) {
+      if (saved === 0) return "0%";
+      const pct = (saved / goal) * 100;
+      if (pct < 0.01) return pct.toFixed(4) + "%";
+      if (pct < 1) return pct.toFixed(3) + "%";
+      if (pct < 10) return pct.toFixed(2) + "%";
+      return pct.toFixed(1) + "%";
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem("italia2028_v2", JSON.stringify({
+          goalINR: state.goalINR,
+          goalName: state.goalName,
+          image: state.image,
+          savedINR: state.savedINR,
+          displayCurrency: state.displayCurrency,
+          inputCurrency: state.inputCurrency,
+          history: state.history,
+          undoStack: state.undoStack,
+          redoStack: state.redoStack,
+          eurInr: state.eurInr,
+          theme: state.theme
+        }));
+      } catch (e) {
+        const status = document.getElementById("statusText");
+        if (status) status.textContent = "Warning: this preview may not allow saving data.";
+      }
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem("italia2028_v2");
+        if (raw) {
+          const data = JSON.parse(raw);
+          Object.assign(state, data);
+        }
+      } catch(e) {
+        console.warn("Could not load saved state:", e);
+      }
+    }
+
+    // ========== UI UPDATE ==========
+    function updateUI() {
+      const cur = state.displayCurrency;
+      const saved = fromINR(state.savedINR, cur);
+      const goal = fromINR(state.goalINR, cur);
+      const remaining = Math.max(0, goal - saved);
+      const pct = state.goalINR > 0 ? Math.min(100, (state.savedINR / state.goalINR) * 100) : 0;
+      const pctText = formatPercent(state.savedINR, state.goalINR);
+
+      $("goalNameDisplay").textContent = state.goalName;
+      document.body.classList.toggle("light", state.theme === "light");
+      $("themeToggle").textContent = state.theme === "dark" ? "☀️ Switch to light mode" : "🌙 Switch to dark mode";
+      $("goalDisplay").textContent = format(goal, cur);
+      $("addedDisplay").textContent = format(saved, cur);
+      $("remainingDisplay").textContent = format(remaining, cur);
+      $("percentDisplay").textContent = pctText;
+      $("progressPill").textContent = pctText;
+      $("progressAmounts").textContent = `${format(saved, cur)} / ${format(goal, cur)}`;
+      $("progressFill").style.width = pct + "%";
+      $("progressDot").style.left = pct + "%";
+      $("missionImage").src = state.image;
+
+      // buttons
+      undoBtn.disabled = state.undoStack.length === 0;
+      redoBtn.disabled = state.redoStack.length === 0;
+
+      // history
+      if (state.history.length === 0) {
+        historyList.innerHTML = `<div style="color:#8e8e93;font-size:14px;text-align:center;padding:12px">No additions yet</div>`;
+      } else {
+        historyList.innerHTML = state.history.slice().reverse().map(h => {
+          const d = new Date(h.timestamp);
+          const time = d.toLocaleString("en-IN", {day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+          return `<div class="history-item">
+            <span class="history-amount">+${format(h.amountDisplay, h.currency)}</span>
+            <span class="history-time">${time}</span>
+          </div>`;
+        }).join("");
+      }
+
+      // settings fields
+      $("editName").value = state.goalName;
+      $("editGoal").value = state.goalINR;
+      $("editImage").value = state.image;
+
+      // currency toggles
+      $("displayInr").classList.toggle("active", state.displayCurrency === "INR");
+      $("displayEur").classList.toggle("active", state.displayCurrency === "EUR");
+      inputCurrency.value = state.inputCurrency;
+
+      saveState();
+    }
+
+    // ========== FOREX ==========
+    async function fetchRate() {
+      try {
+        const res = await fetch("https://api.frankfurter.dev/v1/latest?base=EUR&symbols=INR", { cache: "no-store" });
+        if (!res.ok) throw new Error("Exchange-rate request failed");
+        const data = await res.json();
+        const rate = Number(data?.rates?.INR);
+        if (!Number.isFinite(rate) || rate <= 0) throw new Error("Invalid exchange rate");
+
+        state.eurInr = rate;
+        $("eurInrRate").textContent = "₹" + rate.toFixed(2);
+        $("inrEurRate").textContent = "€" + (1 / rate).toFixed(5);
+        $("rateUpdated").textContent = `Reference rate date: ${data.date} · Checked: ${new Date().toLocaleTimeString("en-IN")}`;
+        updateUI();
+      } catch(e) {
+        $("rateUpdated").textContent = "Could not refresh; showing last saved/default rate.";
+        $("eurInrRate").textContent = "₹" + state.eurInr.toFixed(2);
+        $("inrEurRate").textContent = "€" + (1 / state.eurInr).toFixed(5);
+      }
+    }
+
+    // ========== ACTIONS ==========
+    function pushUndo() {
+      state.undoStack.push({
+        savedINR: state.savedINR,
+        history: JSON.parse(JSON.stringify(state.history))
+      });
+      state.redoStack = [];
+      if (state.undoStack.length > 50) state.undoStack.shift();
+    }
+
+    function addMoney() {
+      const raw = Number(amountInput.value);
+      if (!Number.isFinite(raw) || raw <= 0) {
+        statusText.textContent = "Enter a valid amount greater than zero.";
+        statusText.classList.remove("success"); return;
+      }
+      if (!Number.isFinite(state.goalINR) || state.goalINR <= 0) {
+        statusText.textContent = "Set a valid savings goal first."; return;
+      }
+      const remainingINR = Math.max(0, state.goalINR - state.savedINR);
+      const requestedINR = toINR(raw, state.inputCurrency);
+      if (!Number.isFinite(requestedINR) || requestedINR <= 0) {
+        statusText.textContent = "Could not convert that amount. Check the exchange rate."; return;
+      }
+      if (remainingINR <= 0) {
+        statusText.textContent = "Your goal is already complete. Increase the goal to add more."; return;
+      }
+      if (requestedINR > remainingINR + 0.000001) {
+        statusText.textContent = `That exceeds the remaining goal (${format(remainingINR, "INR")}).`; return;
+      }
+      pushUndo();
+      state.savedINR += requestedINR;
+      state.history.push({amountINR: requestedINR, amountDisplay: raw, currency: state.inputCurrency, timestamp: Date.now()});
+      amountInput.value = ""; addBtn.disabled = true;
+      statusText.textContent = `+${format(raw, state.inputCurrency)} added`;
+      statusText.classList.add("success");
+      updateUI();
+      setTimeout(() => { statusText.textContent = "Savings updated and saved on this device."; statusText.classList.remove("success"); }, 3000);
+    }
+
+    function undo() {
+      if (state.undoStack.length === 0) return;
+      state.redoStack.push({
+        savedINR: state.savedINR,
+        history: JSON.parse(JSON.stringify(state.history))
+      });
+      const prev = state.undoStack.pop();
+      state.savedINR = prev.savedINR;
+      state.history = prev.history;
+      updateUI();
+    }
+
+    function redo() {
+      if (state.redoStack.length === 0) return;
+      state.undoStack.push({
+        savedINR: state.savedINR,
+        history: JSON.parse(JSON.stringify(state.history))
+      });
+      const next = state.redoStack.pop();
+      state.savedINR = next.savedINR;
+      state.history = next.history;
+      updateUI();
+    }
+
+    // ========== EVENTS ==========
+    amountInput.addEventListener("input", () => {
+      addBtn.disabled = !(parseFloat(amountInput.value) > 0);
+    });
+    amountInput.addEventListener("keydown", e => {
+      if (e.key === "Enter" && !addBtn.disabled) addMoney();
+    });
+    addBtn.addEventListener("click", addMoney);
+    undoBtn.addEventListener("click", undo);
+    redoBtn.addEventListener("click", redo);
+
+    inputCurrency.addEventListener("change", () => {
+      state.inputCurrency = inputCurrency.value;
+      saveState();
+    });
+
+    $("displayInr").addEventListener("click", () => {
+      state.displayCurrency = "INR";
+      updateUI();
+    });
+    $("displayEur").addEventListener("click", () => {
+      state.displayCurrency = "EUR";
+      updateUI();
+    });
+
+    $("saveSettings").addEventListener("click", () => {
+      const name = $("editName").value.trim() || DEFAULT_NAME;
+      const goal = parseFloat($("editGoal").value);
+      const img = $("editImage").value.trim() || DEFAULT_IMAGE;
+
+      if (!Number.isFinite(goal) || goal <= 0) { statusText.textContent = "Goal amount must be a number greater than zero."; return; }
+      if (goal < state.savedINR) { statusText.textContent = "Goal cannot be lower than the amount already saved. Increase it or reset savings first."; return; }
+      if (img && !/^https?:\/\//i.test(img)) { statusText.textContent = "Image URL must start with https:// or http://."; return; }
+      pushUndo(); state.goalName = name.slice(0,120); state.goalINR = goal; state.image = img || DEFAULT_IMAGE;
+      updateUI(); statusText.textContent = "Goal updated!"; statusText.classList.add("success");
+      setTimeout(() => statusText.classList.remove("success"), 2500);
+    });
+
+    $("resetAll").addEventListener("click", () => {
+      if (!confirm("Reset everything to zero? This cannot be undone.")) return;
+      state.savedINR = 0;
+      state.history = [];
+      state.undoStack = [];
+      state.redoStack = [];
+      state.goalINR = DEFAULT_GOAL;
+      state.goalName = DEFAULT_NAME;
+      state.image = DEFAULT_IMAGE;
+      updateUI();
+    });
+
+    $("missionImage").addEventListener("click", () => {
+      const url = prompt("Paste new image URL:", state.image);
+      if (url) {
+        state.image = url;
+        updateUI();
+      }
+    });
+
+    // ========== THEME & BACKUPS ==========
+    $("themeToggle").addEventListener("click", () => { state.theme = state.theme === "dark" ? "light" : "dark"; updateUI(); });
+    $("exportBtn").addEventListener("click", () => {
+      try {
+        const backup = {app: "Mission Italia 2028", version: 3, exportedAt: new Date().toISOString(), state: {
+          goalINR: state.goalINR, goalName: state.goalName, image: state.image, savedINR: state.savedINR,
+          displayCurrency: state.displayCurrency, inputCurrency: state.inputCurrency, history: state.history,
+          undoStack: state.undoStack, redoStack: state.redoStack, eurInr: state.eurInr, theme: state.theme
+        }};
+        const blob = new Blob([JSON.stringify(backup, null, 2)], {type: "application/json"});
+        const url = URL.createObjectURL(blob); const a = document.createElement("a");
+        a.href = url; a.download = "mission-italia-2028-backup.json"; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        $("backupStatus").textContent = "Backup exported. Keep the file somewhere safe; it is not encrypted.";
+      } catch(e) { $("backupStatus").textContent = "Export failed in this preview. Try opening the file in a browser."; }
+    });
+    $("importBtn").addEventListener("click", () => $("importFile").click());
+    $("importFile").addEventListener("change", async event => {
+      const file = event.target.files && event.target.files[0]; if (!file) return;
+      try {
+        if (file.size > 2 * 1024 * 1024) throw new Error("Backup file is too large (2 MB maximum).");
+        const parsed = JSON.parse(await file.text()); const data = parsed.state || parsed;
+        const goal = Number(data.goalINR), saved = Number(data.savedINR), rate = Number(data.eurInr);
+        if (!Number.isFinite(goal) || goal <= 0 || !Number.isFinite(saved) || saved < 0 || saved > goal) throw new Error("Goal or savings amount is invalid.");
+        if (!Array.isArray(data.history) || data.history.length > 10000) throw new Error("Savings history is invalid or too large.");
+        if (data.image && !/^https?:\/\//i.test(data.image)) throw new Error("Image URL must start with http:// or https://.");
+        if (data.displayCurrency && !["INR","EUR"].includes(data.displayCurrency)) throw new Error("Display currency is invalid.");
+        if (data.inputCurrency && !["INR","EUR"].includes(data.inputCurrency)) throw new Error("Input currency is invalid.");
+        if (data.theme && !["dark","light"].includes(data.theme)) throw new Error("Theme value is invalid.");
+        if (!confirm("Import this backup and replace the current dashboard data? Export your current data first if you need it.")) return;
+        state.goalINR = goal; state.savedINR = saved; state.goalName = String(data.goalName || DEFAULT_NAME).slice(0,120);
+        state.image = data.image || DEFAULT_IMAGE; state.displayCurrency = data.displayCurrency === "EUR" ? "EUR" : "INR";
+        state.inputCurrency = data.inputCurrency === "EUR" ? "EUR" : "INR"; state.theme = data.theme === "light" ? "light" : "dark";
+        state.eurInr = Number.isFinite(rate) && rate > 0 ? rate : 106.5;
+        state.history = data.history.map(h => ({amountINR:Number(h.amountINR),amountDisplay:Number(h.amountDisplay),currency:h.currency === "EUR" ? "EUR" : "INR",timestamp:Number(h.timestamp)})).filter(h => Number.isFinite(h.amountINR) && h.amountINR > 0 && Number.isFinite(h.amountDisplay) && h.amountDisplay > 0 && Number.isFinite(h.timestamp));
+        state.undoStack = []; state.redoStack = []; updateUI(); fetchRate();
+        $("backupStatus").textContent = "Backup imported successfully.";
+      } catch(e) { $("backupStatus").textContent = "Import failed: " + e.message; }
+      finally { event.target.value = ""; }
+    });
+
+    // ========== INIT ==========
+    loadState();
+    if (!Number.isFinite(Number(state.goalINR)) || Number(state.goalINR) <= 0) state.goalINR = DEFAULT_GOAL;
+    if (!Number.isFinite(Number(state.savedINR)) || Number(state.savedINR) < 0) state.savedINR = 0;
+    if (state.savedINR > state.goalINR) state.savedINR = state.goalINR;
+    if (!Number.isFinite(Number(state.eurInr)) || state.eurInr <= 0) state.eurInr = 106.5;
+    if (!Array.isArray(state.history)) state.history = [];
+    if (!Array.isArray(state.undoStack)) state.undoStack = [];
+    if (!Array.isArray(state.redoStack)) state.redoStack = [];
+    if (!["dark","light"].includes(state.theme)) state.theme = "dark";
+    updateUI();
+    fetchRate();
+    setInterval(fetchRate, 5 * 60 * 1000); // every 5 min
+  </script>
+</body>
+</html>
